@@ -20,6 +20,7 @@ export function ListingForm() {
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
+  const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [email, setEmail] = useState("");
 
@@ -119,7 +120,7 @@ export function ListingForm() {
           category,
           description: description.trim() || null,
           seller_email: email.trim(),
-          location: "Palo Alto, CA",
+          location: location.trim(),
           image_url: imageUrl,
         }),
       });
@@ -266,6 +267,15 @@ export function ListingForm() {
         </div>
 
         <Input
+          value={location}
+          onChange={(event) => setLocation(event.target.value)}
+          placeholder="Location"
+          aria-label="Location"
+          maxLength={120}
+          className="h-12 rounded-lg bg-white text-[15px]"
+        />
+
+        <Input
           type="email"
           autoComplete="email"
           value={email}
@@ -332,7 +342,7 @@ export function ListingForm() {
         <p className="mt-5 text-[15px] leading-relaxed text-muted-foreground">
           Listed just now
           <br />
-          in Palo Alto, CA
+          in {location.trim() || "Palo Alto, CA"}
         </p>
 
         <p className="mt-7 text-[17px] font-bold">Seller information</p>

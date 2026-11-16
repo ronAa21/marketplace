@@ -59,7 +59,7 @@ Without a key the app keeps working — the buyer just sees that the message was
 - **Create listing** — photo upload to the `listing-images` bucket, title, description, price, category, seller email and location. Validated on the client and again in `POST /api/listings`.
 - **Browse & search** — server-rendered 5-column grid, category sidebar (chips on mobile), `ilike` search over title/description, empty and setup states.
 - **Listing detail** — dedicated `/listings/[id]` page with the image, price, description, seller information and the message box.
-- **Message seller** — inline form → `POST /api/messages` → row in `messages` + Resend email to the seller with `reply-to` set to the buyer.
+- **Message seller** — inline form → `sendSellerMessage` Server Action → row in `messages` + Resend email to the seller with `reply-to` set to the buyer.
 
 ## Project structure
 
@@ -69,7 +69,7 @@ app/
   listings/new/page.tsx     Post a listing
   listings/[id]/page.tsx    Listing detail
   api/listings/route.ts     Create listing (server-side validation)
-  api/messages/route.ts     Save message + notify seller
+  actions/messages.ts       Server Action: save message + email seller
 components/
   site-header.tsx
   category-sidebar.tsx, category-tabs.tsx
@@ -77,7 +77,7 @@ components/
   listing-form.tsx, message-seller-form.tsx
   ui/                       shadcn/ui primitives
 lib/
-  categories.ts, format.ts, types.ts, email.ts
+  categories.ts, format.ts, types.ts
 utils/supabase/
   client.ts, server.ts, middleware.ts
 middleware.ts               Keeps Supabase sessions refreshed

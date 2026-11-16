@@ -26,7 +26,7 @@ export function CategoryTabs({
             "inline-flex h-8 items-center rounded-full px-3 text-[13px] font-semibold whitespace-nowrap transition-colors",
             !active
               ? "bg-primary text-primary-foreground"
-              : "bg-white text-foreground hover:bg-white/70",
+              : "bg-muted text-foreground hover:bg-[#e4e6eb]",
           )}
         >
           All
@@ -40,7 +40,7 @@ export function CategoryTabs({
               "inline-flex h-8 items-center rounded-full px-3 text-[13px] font-semibold whitespace-nowrap transition-colors",
               active === category
                 ? "bg-primary text-primary-foreground"
-                : "bg-white text-foreground hover:bg-white/70",
+                : "bg-muted text-foreground hover:bg-[#e4e6eb]",
             )}
           >
             {category}

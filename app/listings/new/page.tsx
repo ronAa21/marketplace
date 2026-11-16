@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 
 export default function NewListingPage() {
   return (
-    <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="text-[24px] font-bold tracking-tight">
+    <div className="mx-auto w-full max-w-[1400px] px-4 pt-3 pb-16 sm:px-6 lg:px-8">
+      <h1 className="text-[30px] leading-tight font-bold tracking-[-0.02em]">
         Create new listing
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">

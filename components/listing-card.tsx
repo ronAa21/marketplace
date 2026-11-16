@@ -10,7 +10,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       href={`/listings/${listing.id}`}
       className="group block focus-visible:outline-none"
     >
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-white ring-1 ring-black/5">
+      <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-[#e4e6eb]">
         {listing.image_url ? (
           <Image
             src={listing.image_url}
@@ -20,21 +20,21 @@ export function ListingCard({ listing }: { listing: Listing }) {
             className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="grid h-full w-full place-items-center bg-[#e4e6eb]">
+          <div className="grid h-full w-full place-items-center">
             <ImageIcon className="size-8 text-muted-foreground/50" strokeWidth={1.5} />
           </div>
         )}
       </div>
 
-      <div className="mt-2">
-        <p className="text-[17px] font-bold leading-tight">
+      <div className="mt-2.5">
+        <p className="text-[17px] leading-5 font-bold">
           {formatPrice(listing.price)}
         </p>
-        <p className="mt-0.5 line-clamp-2 text-[15px] leading-snug">
+        <p className="mt-1 line-clamp-2 text-[15px] leading-[1.3]">
           {listing.title}
         </p>
         {listing.location ? (
-          <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
+          <p className="mt-1 truncate text-[13px] leading-4 text-muted-foreground">
             {listing.location}
           </p>
         ) : null}

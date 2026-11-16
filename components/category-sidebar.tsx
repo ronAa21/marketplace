@@ -19,17 +19,17 @@ export function CategorySidebar({
 }) {
   return (
     <nav aria-label="Categories">
-      <h2 className="text-[17px] font-bold">Categories</h2>
+      <h2 className="px-3 text-[17px] leading-5 font-bold">Categories</h2>
 
-      <ul className="mt-2.5 space-y-0.5">
+      <ul className="mt-4">
         <li>
           <Link
             href={buildHref(undefined, q)}
             className={cn(
-              "block rounded-lg px-2 py-1.5 text-[15px] leading-tight transition-colors",
+              "block rounded-lg px-3 py-[7px] text-[15px] leading-5 transition-colors",
               !active
                 ? "bg-accent font-semibold text-accent-foreground"
-                : "hover:bg-black/5",
+                : "hover:bg-muted",
             )}
           >
             All
@@ -41,10 +41,10 @@ export function CategorySidebar({
             <Link
               href={buildHref(category, q)}
               className={cn(
-                "block rounded-lg px-2 py-1.5 text-[15px] leading-tight transition-colors",
+                "block rounded-lg px-3 py-[7px] text-[15px] leading-5 transition-colors",
                 active === category
                   ? "bg-accent font-semibold text-accent-foreground"
-                  : "hover:bg-black/5",
+                  : "hover:bg-muted",
               )}
             >
               {category}

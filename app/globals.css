@@ -49,7 +49,7 @@
 }
 
 :root {
-  --background: #f0f2f5;
+  --background: #ffffff;
   --foreground: #050505;
   --card: #ffffff;
   --card-foreground: #050505;
@@ -64,8 +64,8 @@
   --accent: #e7f0ff;
   --accent-foreground: #1877f2;
   --destructive: #e41e3f;
-  --border: #ced0d4;
-  --input: #ced0d4;
+  --border: #e4e6eb;
+  --input: #dddfe2;
   --ring: #1877f2;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);

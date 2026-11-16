@@ -51,17 +51,18 @@ export default async function HomePage({
       : "Today's picks";
 
   return (
-    <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-[1400px] px-4 pt-3 pb-16 sm:px-6 lg:px-8">
       <div className="flex gap-8">
-        <aside className="hidden w-[210px] shrink-0 lg:block">
-          <div className="sticky top-6">
+        <aside className="hidden w-[260px] shrink-0 lg:block">
+          {/* Fixed rail: pinned to the viewport below the sticky header. */}
+          <div className="fixed top-[106px] h-[calc(100dvh-106px)] w-[260px] overflow-y-auto pt-6 pb-10 pr-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <CategorySidebar active={category} q={q || undefined} />
           </div>
         </aside>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
-            <h1 className="text-[24px] font-bold tracking-tight text-balance">
+            <h1 className="text-[30px] leading-tight font-bold tracking-[-0.02em] text-balance">
               {heading}
             </h1>
 
@@ -79,7 +80,7 @@ export default async function HomePage({
             <CategoryTabs active={category} q={q || undefined} />
           </div>
 
-          <div className="mt-4">
+          <div className="mt-5">
             {error ? (
               setupIssue ? (
                 <SetupNotice error={error.message} />
@@ -102,7 +103,7 @@ export default async function HomePage({
                 actionHref={q || category ? "/" : "/listings/new"}
               />
             ) : (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-7 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {listings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}

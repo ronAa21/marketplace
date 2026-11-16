@@ -15,7 +15,7 @@ export function EmptyState({
   actionHref?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl bg-white px-6 py-16 text-center ring-1 ring-black/5">
+    <div className="flex flex-col items-center justify-center rounded-xl bg-[#f7f8fa] px-6 py-16 text-center">
       <span className="grid size-14 place-items-center rounded-full bg-secondary text-muted-foreground">
         <PackageOpen className="size-6" strokeWidth={1.6} />
       </span>
