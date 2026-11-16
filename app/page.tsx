@@ -1,103 +1,116 @@
-import Image from "next/image";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
+import { CategorySidebar } from "@/components/category-sidebar";
+import { CategoryTabs } from "@/components/category-tabs";
+import { ListingCard } from "@/components/listing-card";
+import { EmptyState } from "@/components/empty-state";
+import { SetupNotice } from "@/components/setup-notice";
+import type { Listing } from "@/lib/types";
 
-export default function Home() {
+type SearchParams = Promise<{ q?: string; category?: string }>;
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const { q: rawQ, category } = await searchParams;
+  const q = rawQ?.trim() ?? "";
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  let query = supabase
+    .from("listings")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (category) {
+    query = query.eq("category", category);
+  }
+
+  if (q) {
+    // PostgREST's `or` filter is comma separated, so strip its delimiters.
+    const safe = q.replace(/[%,()]/g, " ").trim();
+    query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
+  }
+
+  const { data, error } = await query;
+  const listings = (data ?? []) as Listing[];
+  const setupIssue =
+    !!error &&
+    /could not find the table|schema cache|relation .* does not exist/i.test(
+      error.message,
+    );
+
+  const heading = q
+    ? `Results for “${q}”`
+    : category
+      ? category
+      : "Today's picks";
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex gap-8">
+        <aside className="hidden w-[210px] shrink-0 lg:block">
+          <div className="sticky top-6">
+            <CategorySidebar active={category} q={q || undefined} />
+          </div>
+        </aside>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-[24px] font-bold tracking-tight text-balance">
+              {heading}
+            </h1>
+
+            {q || category ? (
+              <Link
+                href="/"
+                className="shrink-0 text-sm font-semibold text-primary hover:underline"
+              >
+                Clear filters
+              </Link>
+            ) : null}
+          </div>
+
+          <div className="mt-3 lg:hidden">
+            <CategoryTabs active={category} q={q || undefined} />
+          </div>
+
+          <div className="mt-4">
+            {error ? (
+              setupIssue ? (
+                <SetupNotice error={error.message} />
+              ) : (
+                <div className="rounded-xl bg-white p-6 text-sm text-destructive ring-1 ring-black/5">
+                  Could not load listings: {error.message}
+                </div>
+              )
+            ) : listings.length === 0 ? (
+              <EmptyState
+                title={q || category ? "No matches found" : "No listings yet"}
+                description={
+                  q || category
+                    ? "Try a different search term or browse another category."
+                    : "Be the first to post something. It only takes a minute."
+                }
+                actionLabel={
+                  q || category ? "Browse everything" : "Create new listing"
+                }
+                actionHref={q || category ? "/" : "/listings/new"}
+              />
+            ) : (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-7 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {listings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
