@@ -81,9 +81,8 @@ export default async function ListingPage({
 
       {checkout === "success" ? (
         <div className="mt-4 rounded-xl bg-[#e7f6ec] px-4 py-3 text-[14px] leading-relaxed text-[#12603a] ring-1 ring-[#12603a]/10">
-          <strong className="font-semibold">Payment received.</strong> We&apos;re
-          confirming your order — this listing is marked sold as soon as Stripe
-          notifies us.
+          <strong className="font-semibold">Payment received.</strong> Your order
+          is confirmed and this listing is now marked as sold.
         </div>
       ) : checkout === "cancelled" ? (
         <div className="mt-4 rounded-xl bg-[#fff4e5] px-4 py-3 text-[14px] leading-relaxed text-[#8a4b00] ring-1 ring-[#8a4b00]/10">

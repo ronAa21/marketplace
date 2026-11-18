@@ -96,7 +96,7 @@ export async function createCheckoutSession(
         payment_intent_data: {
           application_fee_amount: applicationFee,
         },
-        success_url: `${base}/listings/${listing.id}?checkout=success`,
+        success_url: `${base}/api/checkout/confirm?listing_id=${listing.id}&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${base}/listings/${listing.id}?checkout=cancelled`,
         metadata: { listing_id: listing.id },
       },
