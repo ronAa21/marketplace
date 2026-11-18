@@ -5,16 +5,20 @@ import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { ListingGallery } from "@/components/listing-gallery";
 import { MessageSellerForm } from "@/components/message-seller-form";
+import { BuyNowButton } from "@/components/buy-now-button";
 import { SetupNotice } from "@/components/setup-notice";
 import { displayNameFromEmail, formatPrice, timeAgo } from "@/lib/format";
 import type { Listing } from "@/lib/types";
 
 export default async function ListingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ checkout?: string }>;
 }) {
   const { id } = await params;
+  const { checkout } = await searchParams;
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -52,6 +56,19 @@ export default async function ListingPage({
   const sellerInitial = sellerName.charAt(0).toUpperCase();
   const images = listing.image_url ? [listing.image_url] : [];
 
+  // A seller can only accept online payments after connecting Stripe. The
+  // sellers table may not exist on a fresh install, so a failed lookup simply
+  // means no Buy Now button.
+  const { data: seller } = await supabase
+    .from("sellers")
+    .select("email, stripe_account_id")
+    .eq("email", listing.seller_email.trim().toLowerCase())
+    .maybeSingle();
+
+  const isSold = listing.status === "sold";
+  const sellerRegistered = Boolean(seller);
+  const canBuy = !isSold && Boolean(seller?.stripe_account_id);
+
   return (
     <div className="mx-auto w-full max-w-[1400px] px-4 pt-3 pb-16 sm:px-6 lg:px-8">
       <Link
@@ -61,6 +78,18 @@ export default async function ListingPage({
         <ChevronLeft className="size-5" strokeWidth={2.5} />
         Today&apos;s picks
       </Link>
+
+      {checkout === "success" ? (
+        <div className="mt-4 rounded-xl bg-[#e7f6ec] px-4 py-3 text-[14px] leading-relaxed text-[#12603a] ring-1 ring-[#12603a]/10">
+          <strong className="font-semibold">Payment received.</strong> We&apos;re
+          confirming your order — this listing is marked sold as soon as Stripe
+          notifies us.
+        </div>
+      ) : checkout === "cancelled" ? (
+        <div className="mt-4 rounded-xl bg-[#fff4e5] px-4 py-3 text-[14px] leading-relaxed text-[#8a4b00] ring-1 ring-[#8a4b00]/10">
+          Checkout cancelled. You haven&apos;t been charged.
+        </div>
+      ) : null}
 
       <div className="mt-4 grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="min-w-0">
@@ -80,6 +109,21 @@ export default async function ListingPage({
             Listed {timeAgo(listing.created_at)} in{" "}
             {listing.location || "Palo Alto, CA"}
           </p>
+
+          {isSold ? (
+            <div className="mt-4 rounded-lg bg-[#f0f2f5] px-4 py-3 text-center text-[15px] font-semibold">
+              Sold
+            </div>
+          ) : canBuy ? (
+            <div className="mt-4">
+              <BuyNowButton listingId={listing.id} />
+            </div>
+          ) : sellerRegistered ? (
+            <p className="mt-4 rounded-lg bg-[#f7f8fa] px-4 py-3 text-[13px] leading-relaxed text-muted-foreground">
+              This seller hasn&apos;t connected payouts yet, so online checkout
+              isn&apos;t available. Message them to arrange payment.
+            </p>
+          ) : null}
 
           <hr className="my-5 border-border" />
 

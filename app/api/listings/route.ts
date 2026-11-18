@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/categories";
 import { isEmail } from "@/lib/format";
+import { PROFILE_COOKIE, profileCookieOptions } from "@/lib/session";
 
 type Payload = {
   title?: string;
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
   const title = body.title?.trim() ?? "";
   const price = Number(body.price);
   const category = body.category?.trim() ?? "";
-  const sellerEmail = body.seller_email?.trim() ?? "";
+  const sellerEmail = body.seller_email?.trim().toLowerCase() ?? "";
   const description = body.description?.trim() || null;
   const location = body.location?.trim() || "Palo Alto, CA";
   const imageUrl = body.image_url?.trim() || null;
@@ -75,7 +76,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
+  // Register the seller by email so Stripe Connect onboarding has a row to
+  // attach to. Existing rows are left untouched (their stripe_account_id is
+  // preserved), and a failure here must not block the listing.
+  try {
+    const { error: sellerError } = await supabase
+      .from("sellers")
+      .upsert(
+        { email: sellerEmail },
+        { onConflict: "email", ignoreDuplicates: true },
+      );
+
+    if (sellerError) {
+      console.warn("Could not register the seller:", sellerError.message);
+    }
+  } catch (sellerError) {
+    console.warn("Could not register the seller:", sellerError);
+  }
+
+  // Remember the seller's email so the header avatar and /profile open on the
+  // person who just posted.
+  cookieStore.set(PROFILE_COOKIE, sellerEmail, profileCookieOptions());
+
   revalidatePath("/");
+  revalidatePath("/", "layout");
 
   return NextResponse.json({ id: data.id }, { status: 201 });
 }

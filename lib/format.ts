@@ -59,3 +59,20 @@ export function displayNameFromEmail(email: string): string {
 export function isEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
+
+/** One or two letters for an avatar, from a display name or an email. */
+export function initialsFrom(value: string): string {
+  const source = value.includes("@") ? displayNameFromEmail(value) : value;
+  const parts = source.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) {
+    return "?";
+  }
+
+  const letters =
+    parts.length === 1
+      ? parts[0].charAt(0)
+      : `${parts[0][0]}${parts[parts.length - 1][0]}`;
+
+  return letters.toUpperCase();
+}

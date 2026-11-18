@@ -1,9 +1,38 @@
 import Link from "next/link";
 import { Search, Store } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { ProfileMenu } from "@/components/profile-menu";
+import { displayNameFromEmail } from "@/lib/format";
+import { getProfileEmail } from "@/lib/session";
+import type { Seller } from "@/lib/types";
+import { createStatelessClient } from "@/utils/supabase/stateless";
 import { cn } from "@/lib/utils";
 
-export function SiteHeader() {
+async function loadProfileSummary(email: string) {
+  try {
+    const supabase = createStatelessClient();
+    const { data } = await supabase
+      .from("sellers")
+      .select("*")
+      .eq("email", email)
+      .maybeSingle();
+
+    const seller = data as Seller | null;
+
+    return {
+      name: seller?.display_name?.trim() || displayNameFromEmail(email),
+      location: seller?.location?.trim() || null,
+    };
+  } catch (error) {
+    console.warn("Could not load the profile summary:", error);
+    return { name: null, location: null };
+  }
+}
+
+export async function SiteHeader() {
+  const email = await getProfileEmail();
+  const summary = email ? await loadProfileSummary(email) : { name: null, location: null };
+
   return (
     <header className="z-30 border-b border-black/5 bg-background lg:sticky lg:top-0">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-5 pb-4 sm:px-6 lg:px-8">
@@ -45,6 +74,12 @@ export function SiteHeader() {
             >
               Sell
             </Link>
+
+            <ProfileMenu
+              email={email}
+              name={summary.name}
+              location={summary.location}
+            />
           </div>
         </div>
 
